@@ -66,41 +66,27 @@ void Terminal::start() {
     connect(COMPORT, SIGNAL(readyRead()), this, SLOT(read_data()));
 }
 
-// void Terminal::read_data() {
-//     if (COMPORT->isOpen()) {
-//         if (COMPORT->bytesAvailable()) {
-//             dataFromSerial.append(COMPORT->readAll());
-//         }
-//         // wszystko co powyżej 0x7f nie jest znakiem ascii tylko unicode i trzeba zaczekać na doczytanie
-//         if ((uint8_t)dataFromSerial.back() > 0x7f) {
-//         } else {
-//             QString lineShow = dataFromSerial;
-//             if (!ui->pb_startStop->isChecked()) {
-//                 lineShow.replace(char(13), "");
-//                 lineShow.replace(char(10), "\n");
-//                 ui->pte_read->insertPlainText(lineShow.toLatin1());
-//             }
-//             dataFromSerial.clear();
-//         }
-//         if (ui->cb_rewind->isChecked()) {
-//             ui->pte_read->ensureCursorVisible();
-//         }
-//     }
-// }
-
 void Terminal::read_data() {
     if (COMPORT->isOpen()) {
-        if (COMPORT->bytesAvailable()) {
-            dataFromSerial.append(COMPORT->readLine());
-            QString lineShow = dataFromSerial;
+
+        while (COMPORT->bytesAvailable()) {
+            dataFromSerial.append(COMPORT->readAll());
+        }
+        while (dataFromSerial.contains(char(10))) {
+            QString lineShow = dataFromSerial.left(dataFromSerial.indexOf(char(10)));
+            lineShow.replace(char(13), "");
             if (!ui->pb_startStop->isChecked()) {
-                lineShow.replace(char(13), "");
-                ui->pte_read->insertPlainText(lineShow.toLatin1());
+                ui->pte_read->appendPlainText(lineShow);
                 if (lineShow.contains(ui->le_extract->text())) {
-                    ui->le_udpSend->setText(lineShow);
+                    if (ui->le_change->text() != "") {
+                        lineShow.replace(ui->le_extract->text(), ui->le_change->text());
+                        ui->le_udpSend->setText(lineShow);
+                    } else {
+                        ui->le_udpSend->setText(lineShow);
+                    }
                 }
             }
-            dataFromSerial.clear();
+            dataFromSerial.remove(0, dataFromSerial.indexOf(char(10)) + 1);
         }
         if (ui->cb_rewind->isChecked()) {
             ui->pte_read->ensureCursorVisible();
@@ -144,3 +130,8 @@ void Terminal::on_cb_warp_toggled(bool checked) {
 void Terminal::on_le_lineCount_returnPressed() {
     ui->pte_read->setMaximumBlockCount(ui->le_lineCount->text().toInt());
 }
+
+void Terminal::on_le_udpSend_textChanged(const QString &arg1) {
+    qInfo() << arg1;
+}
+

@@ -30,13 +30,10 @@ private slots:
     void on_pb_clear_read_clicked();
     void on_pb_startStop_toggled(bool checked);
     void on_Terminal_rejected();
-
-
     void on_cb_autoDelete_toggled(bool checked);
-
     void on_cb_warp_toggled(bool checked);
-
     void on_le_lineCount_returnPressed();
+    void on_le_udpSend_textChanged(const QString &arg1);
 
 private:
     Ui::Terminal *ui;

@@ -220,6 +220,9 @@
        <property name="text">
         <string>Start send</string>
        </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
        <property name="autoDefault">
         <bool>false</bool>
        </property>

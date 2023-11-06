@@ -3,6 +3,8 @@
 
 #include <QDialog>
 #include <QSerialPort>
+#include <QNetworkDatagram>
+#include <QUdpSocket>
 
 namespace Ui {
 class Terminal;
@@ -35,10 +37,13 @@ private slots:
     void on_le_lineCount_returnPressed();
     void on_le_udpSend_textChanged(const QString &arg1);
 
+    void on_pb_send_toggled(bool checked);
+
 private:
     Ui::Terminal *ui;
     QSerialPort *COMPORT;
     QByteArray dataFromSerial;
+    QUdpSocket *udpSocket;
 };
 
 #endif // TERMINAL_H

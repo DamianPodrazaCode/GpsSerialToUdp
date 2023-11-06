@@ -5,6 +5,7 @@ Terminal::Terminal(QWidget *parent) : QDialog(parent), ui(new Ui::Terminal) {
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::CustomizeWindowHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint
                    | Qt::WindowCloseButtonHint);
+    udpSocket = new QUdpSocket(this);
 }
 
 Terminal::~Terminal() {
@@ -132,6 +133,17 @@ void Terminal::on_le_lineCount_returnPressed() {
 }
 
 void Terminal::on_le_udpSend_textChanged(const QString &arg1) {
-    qInfo() << arg1;
+    QByteArray data = arg1.toLatin1();
+    QHostAddress ipAdress("255.255.255.255");
+    uint16_t port = ui->le_port->text().toUInt();
+    if (ui->pb_send->isChecked())
+        udpSocket->writeDatagram(data, ipAdress, port);
 }
 
+void Terminal::on_pb_send_toggled(bool checked) {
+    if (checked) {
+        ui->pb_send->setText("Stop send");
+    } else {
+        ui->pb_send->setText("Start send");
+    }
+}

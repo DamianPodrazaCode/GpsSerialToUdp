@@ -58,6 +58,17 @@ void Terminal::start() {
 
     COMPORT->open(QSerialPort::ReadWrite);
 
+    //    $PMTK220,1000*1F<CR><LF>
+    //    $PMTK220, 200*2C<CR><LF>
+    //    $PMTK220,100*2F<CR><LF>
+
+    QString strSend = "$PMTK220,100*2F\r\n";
+    qInfo() << strSend.toLatin1();
+    COMPORT->write(strSend.toLatin1());
+    COMPORT->write(strSend.toLatin1());
+    COMPORT->write(strSend.toLatin1());
+    COMPORT->write(strSend.toLatin1());
+
     if (!COMPORT->isOpen()) {
         COMPORT->close();
         delete COMPORT;

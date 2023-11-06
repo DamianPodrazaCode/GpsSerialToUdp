@@ -1,6 +1,7 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
+#include "terminal.h"
 #include <QDialog>
 #include <QMessageBox>
 #include <QSerialPort>

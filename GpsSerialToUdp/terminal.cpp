@@ -12,8 +12,9 @@ Terminal::~Terminal() {
     delete ui;
 }
 
-void Terminal::start() {
 
+
+void Terminal::start() {
     ui->pte_read->setMaximumBlockCount(ui->le_lineCount->text().toInt());
 
     COMPORT = new QSerialPort();
@@ -58,17 +59,6 @@ void Terminal::start() {
 
     COMPORT->open(QSerialPort::ReadWrite);
 
-    //    $PMTK220,1000*1F<CR><LF>
-    //    $PMTK220, 200*2C<CR><LF>
-    //    $PMTK220,100*2F<CR><LF>
-
-    QString strSend = "$PMTK220,100*2F\r\n";
-    qInfo() << strSend.toLatin1();
-    COMPORT->write(strSend.toLatin1());
-    COMPORT->write(strSend.toLatin1());
-    COMPORT->write(strSend.toLatin1());
-    COMPORT->write(strSend.toLatin1());
-
     if (!COMPORT->isOpen()) {
         COMPORT->close();
         delete COMPORT;
@@ -76,6 +66,32 @@ void Terminal::start() {
     }
 
     connect(COMPORT, SIGNAL(readyRead()), this, SLOT(read_data()));
+
+    QString command = "";
+
+    // command = "$PMTK104*37\r\n";
+
+    ui->pte_read->appendPlainText("Starting GPS...");
+    QApplication::processEvents();
+    QThread::msleep(1000);
+
+    ui->pte_read->appendPlainText("only $GPGGA...");
+    QApplication::processEvents();
+    // zostawienie tylko $GPGGA
+    command = "$PMTK314,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n";
+    COMPORT->flush();
+    COMPORT->write(command.toLatin1());
+    QThread::msleep(1000);
+
+    ui->pte_read->appendPlainText("change frequency...");
+    QApplication::processEvents();
+    // zmiana częstotliwości
+    //command = "$PMTK220,1000*1F\r\n"; // 1Hz
+    command = "$PMTK220,200*2C\r\n";  // 5Hz
+    //command = "$PMTK220,100*2F\r\n";  // 10Hz
+    COMPORT->flush();
+    COMPORT->write(command.toLatin1());
+    QThread::msleep(1000);
 }
 
 void Terminal::read_data() {
@@ -119,6 +135,13 @@ void Terminal::on_pb_startStop_toggled(bool checked) {
 }
 
 void Terminal::on_Terminal_rejected() {
+
+    QString command = "";
+    command = "$PMTK104*37\r\n";
+    COMPORT->flush();
+    COMPORT->write(command.toLatin1());
+    QThread::msleep(1000);
+
     COMPORT->close();
     delete COMPORT;
 }
@@ -143,8 +166,30 @@ void Terminal::on_le_lineCount_returnPressed() {
     ui->pte_read->setMaximumBlockCount(ui->le_lineCount->text().toInt());
 }
 
+QString Terminal::decimalToLonLat(double value) {
+    double degValue = value / 100; // kropka o dwa miejsca w lewo
+    int degrees = (int)degValue;   // obcięcie od prawej do kropki
+    double gps = degrees + (((degValue - degrees) * 100) / 60);
+    return QString::number(gps, 'f', 6);
+}
+
 void Terminal::on_le_udpSend_textChanged(const QString &arg1) {
-    QByteArray data = arg1.toLatin1();
+    // coordTosend.Command = "Lat=" + coordSource.Latitude.ToString("0.000000") + " "
+    // + "Lon=" + coordSource.Longitude.ToString("0.000000") + " Alt=0 StdX=0 StdY=0 StdZ";
+
+    QString temp = arg1;
+    temp.remove(0, temp.indexOf(',') + 1).remove(0, temp.indexOf(',') + 1);
+    QString sMapLat = temp.left(temp.indexOf(','));
+    temp.remove(0, temp.indexOf(',') + 1).remove(0, temp.indexOf(',') + 1);
+    QString sMapLon = temp.left(temp.indexOf(','));
+    // qInfo() << sMapLat << sMapLon;
+    // qInfo() << decimalToLonLat(sMapLat.toDouble()) << decimalToLonLat(sMapLon.toDouble());
+    temp = "Lat=" + decimalToLonLat(sMapLat.toDouble()) //
+        + " Lon=" + decimalToLonLat(sMapLon.toDouble()) //
+        + " Alt=0 StdX=0 StdY=0 StdZ";
+    ui->le_send->setText(temp);
+
+    QByteArray data = temp.toLatin1();
     QHostAddress ipAdress("255.255.255.255");
     uint16_t port = ui->le_port->text().toUInt();
     if (ui->pb_send->isChecked())

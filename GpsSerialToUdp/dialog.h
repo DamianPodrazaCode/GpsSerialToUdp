@@ -34,5 +34,6 @@ private:
     Ui::Dialog *ui;
     void fill_cb_serialInfo();
     QStringList portInfoList;
+    Terminal *term;
 };
 #endif // DIALOG_H

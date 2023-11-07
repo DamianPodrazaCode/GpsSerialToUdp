@@ -37,7 +37,7 @@ void Dialog::on_pb_cancel_clicked() {
 
 void Dialog::on_pb_connect_clicked() {
     if (ui->cb_portNr->count() > 0) {
-        Terminal *term = new Terminal();
+        term = new Terminal();
         term->PortName = ui->cb_portNr->currentText();
         term->BaudRate = ui->cb_baudrate->currentText();
         term->DataBits = ui->cb_databits->currentText();
@@ -45,9 +45,9 @@ void Dialog::on_pb_connect_clicked() {
         term->FlowControl = ui->cb_flowcontrol->currentText();
         term->Parity = ui->cb_parity->currentText();
         term->StopBits = ui->cb_stopbits->currentText();
-        term->start();
-        term->show();
         this->close();
+        term->show();
+        term->start();
     } else {
         QMessageBox::information(this, tr("WARNING!!!"), tr("No Serial Ports."));
         this->close();
@@ -61,6 +61,7 @@ void Dialog::on_Dialog_rejected() {
     setSettings("serial", "FlowControl", ui->cb_flowcontrol->currentText());
     setSettings("serial", "Parity", ui->cb_parity->currentText());
     setSettings("serial", "StopBits", ui->cb_stopbits->currentText());
+    //term->start();
 }
 
 void Dialog::fill_cb_serialInfo() {

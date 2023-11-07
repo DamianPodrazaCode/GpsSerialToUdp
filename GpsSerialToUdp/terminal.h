@@ -2,8 +2,9 @@
 #define TERMINAL_H
 
 #include <QDialog>
-#include <QSerialPort>
 #include <QNetworkDatagram>
+#include <QSerialPort>
+#include <QThread>
 #include <QUdpSocket>
 
 namespace Ui {
@@ -24,7 +25,6 @@ public:
     QString FlowControl;
     QString Parity;
     QString StopBits;
-
     void start();
 
 private slots:
@@ -36,7 +36,6 @@ private slots:
     void on_cb_warp_toggled(bool checked);
     void on_le_lineCount_returnPressed();
     void on_le_udpSend_textChanged(const QString &arg1);
-
     void on_pb_send_toggled(bool checked);
 
 private:
@@ -44,6 +43,7 @@ private:
     QSerialPort *COMPORT;
     QByteArray dataFromSerial;
     QUdpSocket *udpSocket;
+    QString decimalToLonLat(double value);
 };
 
 #endif // TERMINAL_H

@@ -12,8 +12,6 @@ Terminal::~Terminal() {
     delete ui;
 }
 
-
-
 void Terminal::start() {
     ui->pte_read->setMaximumBlockCount(ui->le_lineCount->text().toInt());
 
@@ -65,33 +63,54 @@ void Terminal::start() {
         close();
     }
 
-    connect(COMPORT, SIGNAL(readyRead()), this, SLOT(read_data()));
+    COMPORT->flush();
 
     QString command = "";
 
-    // command = "$PMTK104*37\r\n";
-
+    // full cold start baudrate 9600
+    command = "$PMTK104*37\r\n";
+    COMPORT->write(command.toLatin1());
+    COMPORT->flush();
     ui->pte_read->appendPlainText("Starting GPS...");
     QApplication::processEvents();
     QThread::msleep(1000);
 
-    ui->pte_read->appendPlainText("only $GPGGA...");
-    QApplication::processEvents();
-    // zostawienie tylko $GPGGA
-    command = "$PMTK314,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n";
-    COMPORT->flush();
+    // gps baudrate 115200
+    command = "$PMTK251,115200*1f\r\n";
     COMPORT->write(command.toLatin1());
+    COMPORT->flush();
+    ui->pte_read->appendPlainText("GPS to 115200...");
+    QApplication::processEvents();
+    QThread::msleep(100);
+
+    // comport bautrate 115200
+    COMPORT->close();
+    QThread::msleep(100);
+    qInfo() << COMPORT->setBaudRate(QSerialPort::Baud115200);
+    qInfo() << COMPORT->open(QSerialPort::ReadWrite);
+    ui->pte_read->appendPlainText("COMPORT to 115200...");
+    QApplication::processEvents();
+    QThread::msleep(100);
+
+    command = "$PMTK314,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n";
+    COMPORT->write(command.toLatin1());
+    COMPORT->flush();
+    ui->pte_read->appendPlainText("$PMTK314 ...");
+    QApplication::processEvents();
     QThread::msleep(1000);
 
+    // zmiana częstotliwości
+    // command = "$PMTK220,1000*1F\r\n"; // 1Hz
+    command = "$PMTK220,500*2b\r\n"; // 1Hz
+                                     // command = "$PMTK220,200*2C\r\n";  // 5Hz
+                                     // command = "$PMTK220,100*2F\r\n";  // 10Hz
+    COMPORT->write(command.toLatin1());
+    COMPORT->flush();
     ui->pte_read->appendPlainText("change frequency...");
     QApplication::processEvents();
-    // zmiana częstotliwości
-    //command = "$PMTK220,1000*1F\r\n"; // 1Hz
-    command = "$PMTK220,200*2C\r\n";  // 5Hz
-    //command = "$PMTK220,100*2F\r\n";  // 10Hz
-    COMPORT->flush();
-    COMPORT->write(command.toLatin1());
     QThread::msleep(1000);
+
+    connect(COMPORT, SIGNAL(readyRead()), this, SLOT(read_data()));
 }
 
 void Terminal::read_data() {
@@ -137,11 +156,11 @@ void Terminal::on_pb_startStop_toggled(bool checked) {
 void Terminal::on_Terminal_rejected() {
 
     QString command = "";
+    // full cold start baudrate 9600
     command = "$PMTK104*37\r\n";
-    COMPORT->flush();
     COMPORT->write(command.toLatin1());
+    COMPORT->flush();
     QThread::msleep(1000);
-
     COMPORT->close();
     delete COMPORT;
 }
@@ -170,7 +189,7 @@ QString Terminal::decimalToLonLat(double value) {
     double degValue = value / 100; // kropka o dwa miejsca w lewo
     int degrees = (int)degValue;   // obcięcie od prawej do kropki
     double gps = degrees + (((degValue - degrees) * 100) / 60);
-    return QString::number(gps, 'f', 6);
+    return QString::number(gps, 'f', 7);
 }
 
 void Terminal::on_le_udpSend_textChanged(const QString &arg1) {

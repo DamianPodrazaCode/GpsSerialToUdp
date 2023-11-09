@@ -86,8 +86,8 @@ void Terminal::start() {
     // comport bautrate 115200
     COMPORT->close();
     QThread::msleep(100);
-    qInfo() << COMPORT->setBaudRate(QSerialPort::Baud115200);
-    qInfo() << COMPORT->open(QSerialPort::ReadWrite);
+    COMPORT->setBaudRate(QSerialPort::Baud115200);
+    COMPORT->open(QSerialPort::ReadWrite);
     ui->pte_read->appendPlainText("COMPORT to 115200...");
     QApplication::processEvents();
     QThread::msleep(100);
@@ -101,9 +101,9 @@ void Terminal::start() {
 
     // zmiana częstotliwości
     // command = "$PMTK220,1000*1F\r\n"; // 1Hz
-    command = "$PMTK220,500*2b\r\n"; // 1Hz
-                                     // command = "$PMTK220,200*2C\r\n";  // 5Hz
-                                     // command = "$PMTK220,100*2F\r\n";  // 10Hz
+    // command = "$PMTK220,500*2b\r\n"; // 2Hz
+    command = "$PMTK220,200*2C\r\n";  // 5Hz
+    // command = "$PMTK220,100*2F\r\n";  // 10Hz
     COMPORT->write(command.toLatin1());
     COMPORT->flush();
     ui->pte_read->appendPlainText("change frequency...");

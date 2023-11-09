@@ -92,6 +92,33 @@ void Terminal::start() {
     QApplication::processEvents();
     QThread::msleep(100);
 
+    //SBAS
+//    command = "$PMTK301,2*2E\r\n";
+//    COMPORT->write(command.toLatin1());
+//    COMPORT->flush();
+//    ui->pte_read->appendPlainText("SBAS ...");
+//    QApplication::processEvents();
+//    QThread::msleep(1000);
+//    command = "$PMTK501,2*28\r\n";
+//    COMPORT->write(command.toLatin1());
+//    COMPORT->flush();
+//    ui->pte_read->appendPlainText("SBAS ...");
+//    QApplication::processEvents();
+//    QThread::msleep(1000);
+//    command = "$PMTK313,1*2E\r\n";
+//    COMPORT->write(command.toLatin1());
+//    COMPORT->flush();
+//    ui->pte_read->appendPlainText("SBAS ...");
+//    QApplication::processEvents();
+//    QThread::msleep(1000);
+//    command = "$PMTK513,1*28\r\n";
+//    COMPORT->write(command.toLatin1());
+//    COMPORT->flush();
+//    ui->pte_read->appendPlainText("SBAS ...");
+//    QApplication::processEvents();
+//    QThread::msleep(1000);
+
+    // tylko $GPGGA
     command = "$PMTK314,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n";
     COMPORT->write(command.toLatin1());
     COMPORT->flush();
@@ -100,9 +127,9 @@ void Terminal::start() {
     QThread::msleep(1000);
 
     // zmiana częstotliwości
-    // command = "$PMTK220,1000*1F\r\n"; // 1Hz
+     command = "$PMTK220,1000*1F\r\n"; // 1Hz
     // command = "$PMTK220,500*2b\r\n"; // 2Hz
-    command = "$PMTK220,200*2C\r\n";  // 5Hz
+    //command = "$PMTK220,200*2C\r\n";  // 5Hz
     // command = "$PMTK220,100*2F\r\n";  // 10Hz
     COMPORT->write(command.toLatin1());
     COMPORT->flush();
